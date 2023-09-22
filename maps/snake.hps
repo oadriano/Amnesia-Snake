@@ -1,0 +1,1160 @@
+	 void OnStart()
+	 {
+	 }
+	 
+	 void OnEnter()
+	 {
+	 BlockHint("DarknessHint");
+	 BlockHint("DarknessDecrease");
+	 BlockHint("SanityHit");
+	 BlockHint("SanityLow");
+	 BlockHint("LanternNoOil");
+	 
+	 player_movement_callbacks();
+	 playersetup();
+	 menu_lightning(true);
+	 for(int i=1; i<=3; i++) SetLightVisible("difficultylight_"+i, false);
+	 for(int i=1; i<=2; i++) SetLightVisible("scoremodelight_"+i, false);
+	 clearscorefield(false, 0, 6);
+	 clearscorefield(false, 7, 13);
+	 clearscorefield(false, 14, 16);
+	 }
+
+     void OnLeave()
+     {
+	 
+     }
+	 
+	  void playersetup()
+	  {
+	  SetPlayerMoveSpeedMul(0.1);
+      SetPlayerRunSpeedMul(0);
+	  SetPlayerLookSpeedMul(0);
+	  SetPlayerJumpDisabled(true);
+	  SetPlayerCrouchDisabled(true);
+	  SetLanternDisabled(true);
+	  SetInventoryDisabled(true);
+	  SetSanityDrainDisabled(true);
+	  SetPlayerSanity(100);
+	  }
+
+	 //***STARTPOSITION***
+	 //XX AND YY ARE THE CURRENT POSITIONS OF SNAKE; HERE IS SET THE STARTPOSITION
+	 int xx;
+	 int yy;
+	 
+	 int speed1;
+	 int speed2;
+	 int speed3;
+	 int speed4;
+	
+	void startgame()
+	 {
+	 	if(difficultylight == 1)
+		{
+		steptime = 0.4;
+		}
+		
+		if(difficultylight == 2)
+		{
+		steptime = 0.33;
+		}
+		
+		if(difficultylight == 3)
+		{
+		steptime = 0.28;
+		}
+		
+	speed1 = RandInt(2, 3);
+	speed2 = RandInt(5, 7);
+	speed3 = RandInt(9, 11);
+	speed4 = RandInt(13, 15);
+	int randomvalue_1 = (RandInt(1,2));
+	int randomvalue_2 = (RandInt(1,3));
+	int randomvalue_3 = (RandInt(1,4));
+		switch(wichobstacle)
+		{
+		case 0:
+			if(max_y <= 108)
+			{
+				if(RandInt(1,2) == 1)
+				xx = (max_x/2)-(RandInt(0,3));
+				else
+				xx = (max_x/2)+(RandInt(0,3));
+			yy = ((((max_y-100)/2)+100)+RandInt(1,2));
+			}
+			else
+			{
+				if(RandInt(1,2) == 1)
+				xx = ((max_x/2)-6);
+				else
+				xx = ((max_x/2)+6);
+			yy = (((max_y-100)/2)+100+RandInt(0,4));
+			}
+		break;
+		
+		case 1:
+			if(randomvalue_1 == 1) xx = RandInt(1, 9);
+			else xx = RandInt(19, 27);
+			yy = RandInt(105, 118);
+			randomvalue_1 = (RandInt(1,2));
+		break;
+			
+		case 2:
+			if(randomvalue_2 == 1) xx = RandInt(1, 6);
+			else if(randomvalue_2 == 2)	xx = RandInt(22, 27);
+			else if(randomvalue_2 == 3)	xx = 14;
+			yy = RandInt(105, 118);
+			randomvalue_2 = (RandInt(1,3));
+		break;
+		
+		case 3:
+			if(randomvalue_2 == 1) xx = RandInt(1, 2);
+			else if(randomvalue_2 == 2)	xx = RandInt(26, 27);
+			else if(randomvalue_2 == 3)	xx = RandInt(8, 20);
+			yy = RandInt(105, 118);
+			randomvalue_2 = (RandInt(1,3));
+		break;
+		
+		case 4:
+			if(randomvalue_3 == 1) xx = RandInt(1, 2);
+			else if(randomvalue_3 == 2)	xx = RandInt(8, 13);
+			else if(randomvalue_3 == 3)	xx = RandInt(15, 20);
+			else if(randomvalue_3 == 4)	xx = RandInt(26, 27);
+			yy = RandInt(105, 118);
+			randomvalue_3 = (RandInt(1,4));
+		break;
+		}
+	FadeLightTo("pixel_"+(yy*100+xx), 1, 0, 0, 0.8, -1, 0);
+	
+	clearscorefield(false, 0, 6);
+	clearscorefield(false, 14, 16);
+	snakelength = 1;
+	AddGlobalVarInt(""+convertInty(steps), yy);
+	AddGlobalVarInt(""+convertIntx(steps), xx);
+	steps++;
+	createfeedpoint();
+	direction = 1;
+	gameovers = false;
+	score = 0;
+	pointscollectedgame = 0;
+	 
+	AddTimer("", steptime, "steptimer");
+	}
+	 
+	 
+	 //MENU-----------------------------------------------------------------------
+	 void menu_lightning(bool start)
+	 {
+		if(start == true) for(int i=1; i<=3; i++)
+		{
+		SetLightVisible("menu_"+i+"_2", false);
+		SetLightVisible("menu_"+i+"_3", false);
+		}
+	 
+	 if(menu_instance == 1) FadeLightTo("menu_"+menu_1+"_"+menu_instance, 0, 1, 0, 1, -1, 0);
+	 if(menu_instance == 2) FadeLightTo("menu_"+menu_2+"_"+menu_instance, 0, 1, 0, 1, -1, 0);
+	 if(menu_instance == 3) FadeLightTo("menu_"+menu_3+"_"+menu_instance, 0, 1, 0, 1, -1, 0);
+	 }
+	 
+	void clear_menu()
+	{
+		for (int i=1; i<=5; i++)
+		{
+			FadeLightTo("menu_"+i+"_"+menu_instance, 1, 1, 1, 1, -1, 0);
+		}
+	}
+	 
+	 //PLAYER MOVEMENT AND MENU------------------------------------------------------------
+	 int direction;
+	 bool no_movement = false;
+	 bool gameovers;
+	 
+	 void player_movement_callbacks()
+	 {
+	 AddEntityCollideCallback("Player", "player_forward", "up", false, 1);
+	 AddEntityCollideCallback("Player", "player_left", "left", false, 1);
+	 AddEntityCollideCallback("Player", "player_right", "right", false, 1);
+	 AddEntityCollideCallback("Player", "player_backward", "down", false, 1);
+	 }
+	 /////////////////////////////////////////////////////////////////
+	 bool bmenu = true;
+	 int menu_1 = 1;
+	 int menu_2 = 1;
+	 int menu_3 = 1;
+	 int menu_instance = 1;
+	 bool fieldview = false;
+	 bool setobstacles = false;
+	 int difficultylight = 1;
+	 int scoremodelight = 1;
+	 bool startthegame = false;
+	 /////////////////////////////////////////////////////////////////
+	 bool allowmovement = true;
+	 void left(string &in asParent, string &in asChild, int alState) 
+	 {
+	 RemoveTimer("returnmov");
+	 TeleportPlayer("PlayerStartArea_1");
+	 if (no_movement == false)
+		{
+			if(bmenu == true)
+			{
+			
+				if(startthegame == true)
+				{
+				startthegame = false;
+				startgame();
+				}
+			
+			clear_menu();
+			if(menu_instance == 2) menu_instance--;
+			if(menu_instance == 3) menu_instance = 1;
+			if (fieldview == true) MovePlayerHeadPos(0, 0, 0, 10, 2);
+			if (menu_instance == 1 && menu_1 == 3) fieldview = false;
+				if (menu_instance == 1 && menu_1 == 4)
+				{
+				fieldview = false;
+				setobstacles = false;
+				}
+			for(int i=1; i<=3; i++)
+			{
+			SetLightVisible("menu_"+i+"_2", false);
+			SetLightVisible("menu_"+i+"_3", false);
+			}
+			
+			menu_lightning(false);
+			}
+			
+			else
+			{
+				if(allowmovement == true)
+				{
+				if (direction == 1) direction = 4;
+				else direction--;
+				allowmovement = false;
+				}
+			}
+		SetLightVisible("difficultylight_"+difficultylight, false);
+		SetLightVisible("scoremodelight_"+scoremodelight, false);
+		
+		if(startthegame == true)
+		{
+		startthegame = false;
+		startgame();
+		}
+		}
+	 AddTimer("returnmov", 0.055, "returnmovement");
+	 no_movement = true;
+	 }
+	 ////////////////////////////////////////////////////////////////////
+	 
+	 void right(string &in asParent, string &in asChild, int alState) 
+	 {
+	 RemoveTimer("returnmov");
+	 TeleportPlayer("PlayerStartArea_1");
+	 if (no_movement == false)
+		{
+			if(bmenu == true)
+			{
+				if(startthegame == true)
+				{
+				startthegame = false;
+				startgame();
+				}
+			
+				if (menu_instance == 1 && menu_1 == 1)
+				{
+				MovePlayerHeadPos(11, 0, 3.5, 10, 2);
+				bmenu = false;
+				clearscorefield(false, 0, 6);
+				startthegame = true;
+				}
+				
+				if (menu_instance == 1 && menu_1 == 2)
+				{
+				menu_instance++;
+				for(int i=1; i<=3; i++) SetLightVisible("menu_"+i+"_2", true);
+				}
+				
+				if (menu_instance == 1 && menu_1 == 3)
+				{
+				wichobstacle = 0;
+				cleargamefield();
+				MovePlayerHeadPos(11, 0, 3.5, 10, 2);
+				fieldview = true;
+				}
+				
+				if (menu_instance == 1 && menu_1 == 4)
+				{
+				MovePlayerHeadPos(11, 0, 3.5, 10, 2);
+				fieldview = true;
+				setobstacles = true;
+					if (wichobstacle == 0)
+					{
+					cleargamefield();
+					AddTimer("", 0, "Maximizefield");
+					}
+				}
+				
+				if (menu_instance == 1 && menu_1 == 5)
+				{
+				menu_instance = 3;
+				for(int i=1; i<=2; i++) SetLightVisible("menu_"+i+"_3", true);
+				}
+				menu_lightning(false);
+			
+				if (menu_instance == 2 && menu_2 == 1) //EASY
+				{
+				SetLightVisible("difficultylight_"+difficultylight, false);
+				difficultylight = 1;
+				FadeLightTo("difficultylight_"+difficultylight, 0.55, 0, 0, 1, -1, 0);
+				}
+				
+				if (menu_instance == 2 && menu_2 == 2) //MEDIUM
+				{
+				SetLightVisible("difficultylight_"+difficultylight, false);
+				difficultylight = 2;
+				FadeLightTo("difficultylight_"+difficultylight, 0.55, 0, 0, 1, -1, 0);
+				}
+				
+				if (menu_instance == 2 && menu_2 == 3) //HARD
+				{
+				SetLightVisible("difficultylight_"+difficultylight, false);
+				difficultylight = 3;
+				FadeLightTo("difficultylight_"+difficultylight, 0.55, 0, 0, 1, -1, 0);
+				}
+				
+				if (menu_instance == 3 && menu_3 == 1)
+				{
+				SetLightVisible("scoremodelight_"+scoremodelight, false);
+				scoremodelight = 1;
+				FadeLightTo("scoremodelight_"+scoremodelight, 0.55, 0, 0, 1, -1, 0);
+				}
+				
+				if (menu_instance == 3 && menu_3 == 2)
+				{
+				SetLightVisible("scoremodelight_"+scoremodelight, false);
+				scoremodelight = 2;
+				FadeLightTo("scoremodelight_"+scoremodelight, 0.55, 0, 0, 1, -1, 0);
+				}
+			}
+			
+			else
+			{
+			if(allowmovement == true)
+			{
+			if (direction == 4) direction = 1;
+			else direction++;
+			allowmovement = false;
+			}
+			
+			}
+		}
+	 AddTimer("returnmov", 0.055, "returnmovement");
+	 no_movement = true;
+	 }
+	 
+	 void Maximizefield(string &in asTimer)
+	 {
+	 if((120-max_y) > 0)
+		{
+		max_y++;
+		max_x++;
+			for(int i=1; i<=max_x; i++)FadeLightTo("pixel_"+(max_y*100+i), 1, 1, 1, 1, -1, 0);
+			for(int j=101; j<=max_y; j++)FadeLightTo("pixel_"+(j*100+max_x), 1, 1, 1, 1, -1, 0);
+		AddTimer("", 0.05, "Maximizefield");
+		}
+	 }
+
+	 void returnmovement(string &in asTimer)
+	 {
+		no_movement = false;
+	 }
+	 /////////////////////////////////////////////////////////////////////
+	 int wichobstacle = 0;
+	 
+	 void up(string &in asParent, string &in asChild, int alState) 
+	 {
+	 RemoveTimer("returnmov");
+	 TeleportPlayer("PlayerStartArea_1");
+	 if (no_movement == false)
+		{
+			if(bmenu == true)
+			{
+				if(startthegame == true)
+				{
+				startthegame = false;
+				startgame();
+				}
+			
+			clear_menu();
+				if(fieldview == false)
+				{
+					if(menu_instance == 1)
+					{
+					if(menu_1 == 1) menu_1 = 1;
+					else menu_1--;
+					}
+				
+					else if(menu_instance == 2)
+					{
+					if(menu_2 == 1) menu_2 = 1;
+					else menu_2--;
+					}
+					
+					else if(menu_instance == 3)
+					{
+					if(menu_3 == 1) menu_3 = 1;
+					else menu_3--;
+					}
+				}
+				else if (fieldview == true && setobstacles == false)
+				{
+				if(max_y > 103)
+					{
+					cleargamefield();
+					for(int i=1; i<=max_x; i++)SetLightVisible("pixel_"+(max_y*100+i), false);
+					for(int j=101; j<=max_y; j++)SetLightVisible("pixel_"+(j*100+max_x), false);
+					max_x--;
+					max_y--;
+					}
+				}
+				
+				else if (fieldview = true && setobstacles == true)
+				{
+					if(wichobstacle == 4) wichobstacle = 0;
+					else wichobstacle++;
+				drawobstacles();
+				}
+			menu_lightning(false);
+			}	
+			
+			if(startthegame == true)
+			{
+			startthegame = false;
+			startgame();
+			}
+			
+			else
+			{
+			TeleportPlayer("PlayerStartArea_1");
+			if (gameovers == true)	startgame();
+			}
+		}
+	 AddTimer("returnmov", 0.055, "returnmovement");
+	 no_movement = true;
+	 }
+	 /////////////////////////////////////////////////////////////////////
+	 void down(string &in asParent, string &in asChild, int alState) 
+	 {
+	 RemoveTimer("returnmov");
+	 TeleportPlayer("PlayerStartArea_1");
+	 if (no_movement == false)
+		{
+			if(bmenu == true)
+			{
+			
+				if(startthegame == true)
+				{
+				startthegame = false;
+				startgame();
+				}
+			
+			clear_menu();
+			if(fieldview == false)
+			{
+				if(menu_instance == 1)
+				{
+					if(menu_1 == 5) menu_1 = 5;
+					else menu_1++;
+				}
+				
+				else if(menu_instance == 2)
+				{
+					if(menu_2 == 3) menu_2 = 3;
+					else menu_2++;
+				}
+				
+				else if(menu_instance == 3)
+				{
+					if(menu_3 == 2) menu_3 = 2;
+					else menu_3++;
+				}
+			}
+			else if (fieldview == true && setobstacles == false)
+			{
+				if(max_x < 27)
+				{
+				cleargamefield();
+				wichobstacle = 0;
+				max_x++;
+				max_y++;
+					for(int i=1; i<=max_x; i++)SetLightVisible("pixel_"+(max_y*100+i), true);
+					for(int j=101; j<=max_y; j++)SetLightVisible("pixel_"+(j*100+max_x), true);
+				}
+			}
+			
+			else if (fieldview = true && setobstacles == true)
+			{
+				if(wichobstacle == 0)
+				wichobstacle = 4;
+				else
+				wichobstacle--;
+				drawobstacles();
+				}
+			menu_lightning(false);
+			}
+			
+			if (gameovers == true)
+			{
+			bmenu = true;
+			fieldview = false;
+			MovePlayerHeadPos(0, 0, 0, 10, 2);
+			clearscorefield(false, 0, 6);
+			clearscorefield(false, 14, 16);
+			gameovers = false;
+			}
+			
+			if(startthegame == true)
+			{
+			startthegame = false;
+			startgame();
+			}
+		}
+	 AddTimer("returnmov", 0.055, "returnmovement");
+	 no_movement = true;
+	 }
+	 
+	 void drawobstacles()
+	 {
+			switch(wichobstacle)
+			{
+				case 0:
+				cleargamefield();
+				break;
+				case 1:
+				cleargamefield();
+					for(int i=10; i<=18; i++)
+						{
+							for(int j=102; j<=119;j++)
+							{
+							FadeLightTo("pixel_"+(j*100+i), 0, 0, 0.9, 1, -1, 0);
+							}
+						}
+		
+				break;
+				case 2:
+				cleargamefield();
+					for(int j=102; j<=119; j++)
+					{
+					for(int i=7; i<=13; i++)
+						{
+						FadeLightTo("pixel_"+(j*100+i), 0, 0, 0.9, 1, -1, 0);
+						FadeLightTo("pixel_"+(j*100+(i+8)), 0, 0, 0.9, 1, -1, 0);
+						}
+					}
+				break;
+				case 3:
+				cleargamefield();
+					for(int j=103; j<=109; j++)
+					{
+						for(int i=3; i<=7; i++)
+						{
+						FadeLightTo("pixel_"+(j*100+i), 0, 0, 0.9, 1, -1, 0);
+						FadeLightTo("pixel_"+((j+9)*100+i), 0, 0, 0.9, 1, -1, 0);
+						FadeLightTo("pixel_"+((j+9)*100+(i+18)), 0, 0, 0.9, 1, -1, 0);
+						FadeLightTo("pixel_"+(j*100+(i+18)), 0, 0, 0.9, 1, -1, 0);
+						}
+					}
+			    break;
+				case 4:
+				cleargamefield();
+					for(int j=103; j<=109; j++)
+					{
+						for(int i=3; i<=7; i++)
+						{
+						FadeLightTo("pixel_"+(j*100+i), 0, 0, 0.9, 1, -1, 0);
+						FadeLightTo("pixel_"+((j+9)*100+i), 0, 0, 0.9, 1, -1, 0);
+						FadeLightTo("pixel_"+((j+9)*100+(i+18)), 0, 0, 0.9, 1, -1, 0);
+						FadeLightTo("pixel_"+(j*100+(i+18)), 0, 0, 0.9, 1, -1, 0);
+						}
+					}
+					for(int j=102; j<=120; j++) FadeLightTo("pixel_"+(j*100+14), 0, 0, 0.9, 1, -1, 0);
+			    break;
+			  }
+	}
+	 
+	//***INT TO STRING CONVERSION***
+		//***IDENTITY OF THE SNAKE POINTS***
+			//THROUGH "number/1000000" IT IS POSSIBLE TO CONVERT INT TO STRING UNTIL THE INT ARRIVES 1000000, ABOVE 1000000 THE GAME WILL CRASH
+		
+	string convertInty(int number)
+	{
+    string temp="";
+    returnvalue="tempy";
+    while (number>0)
+		{
+		temp+=number;
+		number=(number/100000);
+		}
+    returnvalue+=temp;
+    return returnvalue;
+	}
+	
+	string returnvalue;
+	string convertIntx(int number)
+	{
+    string temp="";
+    returnvalue="tempx";
+    while (number>0)
+		{
+		temp+=number;
+		number=(number/100000);
+		}
+    returnvalue+=temp;
+    return returnvalue;
+	} 
+		//***IDENTITY OF THE FEEDPOINTS***
+	string convertIntyr(int number)
+	{
+    string temp="";
+    returnvalue="tempyr";
+    while (number>0)
+		{
+		temp+=number;
+		number=(number/100000);
+		}
+    returnvalue+=temp;
+    return returnvalue;
+	} 
+		
+	string convertIntxr(int number)
+	{
+    string temp="";
+    returnvalue="tempxr";
+    while (number>0)
+		{
+		temp+=number;
+		number=(number/100000);
+		}
+    returnvalue+=temp;
+    return returnvalue;
+	} 
+	
+	int max_x = 27;
+	int max_y = 120;
+	//***DRAWING TOP OF THE SNAKE***
+	int highscore;
+	int nhighscore;
+	bool lost = false;
+	void topsnake()
+	{
+		if (direction == 1) yy--; //UP
+		if (direction == 2) xx++; //RIGHT
+		if (direction == 3) yy++; //DOWN
+		if (direction == 4) xx--; //LEFT
+		//IN CASE OF LOSING
+		switch (wichobstacle)
+		{
+			case 0:
+				for (int i=0; i<=snakelength; i++) if((yy*100+xx) == GetGlobalVarInt(""+convertInty(steps-i))*100+GetGlobalVarInt(""+convertIntx(steps-i)))
+				{
+				lost = true;
+				}	
+
+				if (xx == 0 || xx == max_x+1 || yy == 100 || yy == max_y+1)
+				{
+				lost = true;
+				}
+			break;
+				
+			case 1:			
+				for(int x=10; x<=18; x++) if((102*100+x) == (yy*100+xx) || (119*100+x) == (yy*100+xx))
+				{
+				lost = true;
+				}
+				
+				for(int y=102; y<=119; y++) if((y*100+10) == (yy*100+xx) || (y*100+18) == (yy*100+xx))
+				{
+				lost = true;
+				}
+				
+				if(xx == 0 || xx == max_x+1 || yy == 100 || yy == max_y+1)
+				{
+				lost = true;
+				}
+				
+				for (int i=0; i<=snakelength; i++) if( (yy*100+xx) == (GetGlobalVarInt(""+convertInty(steps-i))*100+GetGlobalVarInt(""+convertIntx(steps-i))))
+				{
+				lost = true; 
+				}
+			break;
+			
+			case 2:				
+				for(int x=7; x<=13; x++) if ((102*100+x) == (yy*100+xx) || (102*100+(x+8)) == (yy*100+xx) || (119*100+x) == (yy*100+xx) || (119*100+(x+8)) == (yy*100+xx))
+				{
+				lost = true;
+				}
+				
+				for(int y=102; y<=119;y++) if ((y*100+7) == (yy*100+xx) || (y*100+13) == (yy*100+xx) || (y*100+15) == (yy*100+xx) || (y*100+21) == (yy*100+xx))
+				{
+				lost = true;
+				}
+				
+				for (int i=0; i<=snakelength; i++) if((yy*100+xx) == GetGlobalVarInt(""+convertInty(steps-i))*100+GetGlobalVarInt(""+convertIntx(steps-i)))
+				{
+				lost = true;
+				}
+				
+				if (xx == 0 || xx == max_x+1 || yy == 100)
+				{
+				lost = true;
+				}
+			break;
+				
+			case 3: 			
+				for(int x=3; x<=7; x++) if ((103*100+x) == (yy*100+xx) || (103*100+(x+18)) == (yy*100+xx) || (118*100+x) == (yy*100+xx) || (118*100+(x+18)) == (yy*100+xx) || (112*100+(x+18)) == (yy*100+xx) || (112*100+x) == (yy*100+xx) || (109*100+x) == (yy*100+xx) || (109*100+(x+18)) == (yy*100+xx))
+				{
+				lost = true;
+				}
+				
+				for(int y=103; y<=109;y++) if((y*100+3) == (yy*100+xx) || (y*100+7) == (yy*100+xx) || (y*100+21) == (yy*100+xx) || (y*100+25) == (yy*100+xx) || ((y+9)*100+3) == (yy*100+xx) || ((y+9)*100+7) == (yy*100+xx) || ((y+9)*100+21) == (yy*100+xx) || ((y+9)*100+25) == (yy*100+xx))
+				{
+				lost = true;
+				}
+				
+				for (int i=0; i<=snakelength; i++) if((yy*100+xx) == GetGlobalVarInt(""+convertInty(steps-i))*100+GetGlobalVarInt(""+convertIntx(steps-i)))
+				{
+				lost = true;
+				}
+				
+				if(xx == 0 || xx == max_x+1 || yy == 100 || yy == max_y+1)
+				{
+				lost = true;
+				}
+			break;
+			
+			case 4:				
+				for(int x=3; x<=7; x++) if ((103*100+x) == (yy*100+xx) || (103*100+(x+18)) == (yy*100+xx) || (118*100+x) == (yy*100+xx) || (118*100+(x+18)) == (yy*100+xx) || (112*100+(x+18)) == (yy*100+xx) || (112*100+x) == (yy*100+xx) || (109*100+x) == (yy*100+xx) || (109*100+(x+18)) == (yy*100+xx))
+				{
+				lost = true;
+				}
+				
+				for(int y=103; y<=109;y++) if((y*100+3) == (yy*100+xx) || (y*100+7) == (yy*100+xx) || (y*100+21) == (yy*100+xx) || (y*100+25) == (yy*100+xx) || ((y+9)*100+3) == (yy*100+xx) || ((y+9)*100+7) == (yy*100+xx) || ((y+9)*100+21) == (yy*100+xx) || ((y+9)*100+25) == (yy*100+xx))
+				{
+				lost = true;
+				}
+				
+				for (int i=0; i<=snakelength; i++) if((yy*100+xx) == GetGlobalVarInt(""+convertInty(steps-i))*100+GetGlobalVarInt(""+convertIntx(steps-i)))
+				{
+				lost = true;
+				}
+				
+				if(xx == 0 || xx == max_x+1 || yy == 100 || yy == max_y+1)
+				{
+				lost = true;
+				}
+				
+				for(int z=102; z<=120; z++) if((z*100+14) == (yy*100+xx))
+				{
+				lost = true;
+				}
+				
+				if(xx == 0 || xx == max_x+1 || yy == 100 || yy == max_y+1)
+				{
+				lost = true;
+				}
+				
+				for (int i=0; i<=snakelength; i++)if((yy*100+xx) == GetGlobalVarInt(""+convertInty(steps-i))*100+GetGlobalVarInt(""+convertIntx(steps-i)))
+				{
+				lost = true;
+				}
+			
+			break;
+		}
+		
+		if(lost == true)
+		{
+		lost = false;
+		activategameover();
+	 	}
+		
+		else FadeLightTo("pixel_"+(yy*100+xx), 1, 0, 0, 0.8, -1, 0);
+		
+		if(nhighscore > highscore)
+		{
+		highscore=nhighscore;
+		drawscore(nhighscore, 7, 2);
+		}
+		
+	
+	AddGlobalVarInt(""+convertInty(steps), yy);
+	AddGlobalVarInt(""+convertIntx(steps), xx);
+	steps++;
+	}
+	
+	void activategameover()
+	{
+	RemoveTimer("repeater");
+	nhighscore=score;
+	gameovers = true;
+	drawobstacles();
+	pointscollected++;
+	if (scoremodelight == 2)
+		{
+			switch(wichobstacle)
+			{
+			case 0:
+			drawscore(((snakelength-1)*(50*difficultylight)+(100/(max_y-100))), 0, 1);
+			break;
+			case 1:
+			drawscore((((snakelength-1)*(50*difficultylight))+30), 0, 1);
+			break;
+			case 2:
+			drawscore((((snakelength-1)*(50*difficultylight))+35), 0, 1);
+			break;
+			case 3:
+			drawscore((((snakelength-1)*(50*difficultylight))+35), 0, 1);
+			break;
+			case 4:
+			drawscore((((snakelength-1)*(50*difficultylight))+45), 0, 1);
+			break;
+			}
+		}
+	}
+	
+	void cleargamefield()
+	{
+	for (int i=1; i<=max_x; i++)
+		{
+		for (int j=101; j<=max_y; j++) FadeLightTo("pixel_"+(j*100+i), 1, 1, 1, 1, -1, 0);//clear the field up
+		}
+	}
+	
+	//***REMOVE END OF THE SNAKE /CREATING THE SNAKE
+	void removepoint()
+	{
+	FadeLightTo("pixel_"+(GetGlobalVarInt(""+convertInty(steps-(snakelength+1)))*100+GetGlobalVarInt(""+convertIntx(steps-(snakelength+1)))), 1, 1, 1, 1, -1, 0);
+	}
+	
+	//***CREATING THE POINTS THE PLAYER HAS TO PICK UP***
+	int pointscollectedgame = 0;
+	int pointscollected = 0; //FEEDPOINTS COLLECTED SO FAR, USED FOR IDENTIFICATION OF A FEEDPOINT
+	bool onsnake; //IF TRUE, FEEDPOINT IS ON A PART OF SNAKE
+	void createfeedpoint()
+	{
+	onsnake = false;
+	pointscollected++;
+	AddGlobalVarInt(""+convertIntxr(pointscollected), RandInt(1,max_x));
+	AddGlobalVarInt(""+convertIntyr(pointscollected), RandInt(101,max_y));
+		switch (wichobstacle)
+		{
+		case 0:
+		for (int i=0; i<=snakelength; i++)	if((GetGlobalVarInt(""+convertIntyr(pointscollected))*100+(GetGlobalVarInt(""+convertIntxr(pointscollected)))) == (GetGlobalVarInt(""+convertInty(steps-i))*100+GetGlobalVarInt(""+convertIntx(steps-i))))
+		{
+		onsnake = true;
+		}
+		
+		if(onsnake == false)	FadeLightTo("pixel_"+(GetGlobalVarInt(""+convertIntyr(pointscollected))*100+GetGlobalVarInt(""+convertIntxr(pointscollected))), 0, 1, 0, 0.8, -1, 0);
+		else if(onsnake == true)	createfeedpoint();
+		break; 
+		
+		case 1:
+			for(int x=10; x<=18; x++)
+			{
+				for(int y=102; y<=119;y++)
+				{
+					if((y*100+x) == (GetGlobalVarInt(""+convertIntyr(pointscollected))*100+GetGlobalVarInt(""+convertIntxr(pointscollected))))
+					{
+					onsnake = true;
+					}
+				}
+			}
+			
+			for (int i=0; i<=snakelength; i++) if (((GetGlobalVarInt(""+convertIntyr(pointscollected))*100+GetGlobalVarInt(""+convertIntxr(pointscollected)))) == GetGlobalVarInt(""+convertInty(steps-i))*100+GetGlobalVarInt(""+convertIntx(steps-i)))
+			{
+			onsnake = true;
+			}
+			
+				if(onsnake == false)	FadeLightTo("pixel_"+(GetGlobalVarInt(""+convertIntyr(pointscollected))*100+GetGlobalVarInt(""+convertIntxr(pointscollected))), 0, 1, 0, 0.8, -1, 0);	
+				else if(onsnake == true)	createfeedpoint();
+			break;
+			
+		case 2:
+			for(int x=7; x<=13; x++)
+			{
+				for(int y=102; y<=119; y++)
+				{
+					if((y*100+x) == (GetGlobalVarInt(""+convertIntyr(pointscollected))*100+GetGlobalVarInt(""+convertIntxr(pointscollected))) || (y*100+(x+8)) == (GetGlobalVarInt(""+convertIntyr(pointscollected))*100+GetGlobalVarInt(""+convertIntxr(pointscollected))))
+					{
+					onsnake = true;
+					}
+				}
+			}
+			
+			for (int i=0; i<=snakelength; i++) if (((GetGlobalVarInt(""+convertIntyr(pointscollected))*100+GetGlobalVarInt(""+convertIntxr(pointscollected)))) == GetGlobalVarInt(""+convertInty(steps-i))*100+GetGlobalVarInt(""+convertIntx(steps-i)))
+			{
+			onsnake = true;
+			}
+			
+				if(onsnake == false)	FadeLightTo("pixel_"+(GetGlobalVarInt(""+convertIntyr(pointscollected))*100+GetGlobalVarInt(""+convertIntxr(pointscollected))), 0, 1, 0, 0.8, -1, 0);
+				else if(onsnake == true)	createfeedpoint();
+			break;
+			
+		case 3:
+			for(int x=3; x<=7; x++)
+			{
+				for(int y=103; y<=109; y++)
+				{
+					if((y*100+x) == (GetGlobalVarInt(""+convertIntyr(pointscollected))*100+GetGlobalVarInt(""+convertIntxr(pointscollected))) || ((y+9)*100+x) == (GetGlobalVarInt(""+convertIntyr(pointscollected))*100+GetGlobalVarInt(""+convertIntxr(pointscollected))) || ((y+9)*100+(x+18)) == (GetGlobalVarInt(""+convertIntyr(pointscollected))*100+GetGlobalVarInt(""+convertIntxr(pointscollected))) || (y*100+(x+18)) == (GetGlobalVarInt(""+convertIntyr(pointscollected))*100+GetGlobalVarInt(""+convertIntxr(pointscollected))))
+					{
+					onsnake = true;
+					}
+				}
+			}
+			
+			for (int i=0; i<=snakelength; i++) if (((GetGlobalVarInt(""+convertIntyr(pointscollected))*100+GetGlobalVarInt(""+convertIntxr(pointscollected)))) == GetGlobalVarInt(""+convertInty(steps-i))*100+GetGlobalVarInt(""+convertIntx(steps-i)))
+			{
+			onsnake = true;
+			}
+			
+				if(onsnake == false)	FadeLightTo("pixel_"+(GetGlobalVarInt(""+convertIntyr(pointscollected))*100+GetGlobalVarInt(""+convertIntxr(pointscollected))), 0, 1, 0, 0.8, -1, 0);
+				else if(onsnake == true)	createfeedpoint();
+			break;
+			
+		case 4:
+			for(int x=3; x<=7; x++)
+			{
+				for(int y=103; y<=109; y++)
+				{
+					if((y*100+x) == (GetGlobalVarInt(""+convertIntyr(pointscollected))*100+GetGlobalVarInt(""+convertIntxr(pointscollected))) || ((y+9)*100+x) == (GetGlobalVarInt(""+convertIntyr(pointscollected))*100+GetGlobalVarInt(""+convertIntxr(pointscollected))) || ((y+9)*100+(x+18)) == (GetGlobalVarInt(""+convertIntyr(pointscollected))*100+GetGlobalVarInt(""+convertIntxr(pointscollected))) || (y*100+(x+18)) == (GetGlobalVarInt(""+convertIntyr(pointscollected))*100+GetGlobalVarInt(""+convertIntxr(pointscollected))))
+					{
+					onsnake = true;
+					}
+				}
+			}
+			
+			for (int i=0; i<=snakelength; i++) if (((GetGlobalVarInt(""+convertIntyr(pointscollected))*100+GetGlobalVarInt(""+convertIntxr(pointscollected)))) == (GetGlobalVarInt(""+convertInty(steps-i))*100+GetGlobalVarInt(""+convertIntx(steps-i))))
+			{
+			onsnake = true;
+			}
+			
+			for(int z=102; z<=120; z++) if ((z*100+14) == (GetGlobalVarInt(""+convertIntyr(pointscollected))*100+GetGlobalVarInt(""+convertIntxr(pointscollected))))
+			{
+			onsnake = true;
+			}
+			
+			
+				if(onsnake == false)	FadeLightTo("pixel_"+(GetGlobalVarInt(""+convertIntyr(pointscollected))*100+GetGlobalVarInt(""+convertIntxr(pointscollected))), 0, 1, 0, 0.8, -1, 0);
+				else if(onsnake == true)	createfeedpoint();
+			break;
+		}
+	}
+	
+	int score;
+	int tempscore;
+	int place;
+	int digit;
+	int parser = 1000000;
+	void drawscore(int addscore, int offset, int multipler)
+	{
+		if (offset == 0)
+		{
+		clearscorefield(true, 0, 6);
+		score+=addscore;
+		tempscore=score;
+		}
+	
+		else if (offset == 7)
+		{	
+		clearscorefield(true, 7, 13);
+		tempscore=addscore;
+		}
+		
+		else if (offset == 14)
+		{
+		clearscorefield(true, 14, 20);
+		tempscore=addscore;
+		}
+	
+	place=offset;
+	parser=1000000;
+		while (place<=(7*multipler))
+		{	
+			if((tempscore/parser) == 0)
+			{
+			SetLightVisible("score_0_"+place, true);
+			parser/=10;
+			place++;
+			}
+			
+			else if((tempscore/parser) <= 9 && ((tempscore/parser) >= 1))
+			{
+			digit=tempscore/parser;
+			SetLightVisible("score_"+digit+"_"+place, true);
+			parser/=10;
+			place++;
+			}
+			
+			else if((tempscore/parser) > 9)
+			{
+			tempscore-=tenlength(tempscore);
+				if(tempscore == 0)
+				{
+					while(place <= (7*multipler))
+					{
+					SetLightVisible("score_0_"+place, true);
+					parser/=10;
+					place++;
+					}
+				}
+			digit=tempscore/parser;
+			SetLightVisible("score_"+digit+"_"+place, true);
+			place++;
+			parser/=10;
+			}
+		}
+	}
+	
+	int returnnumber;
+	int returntenlength = 1;
+	int power = 0;
+	int tenlength(int number)
+	{
+		while(number >= 10)
+		{
+		number/=10;
+		power++;
+		}
+		
+		while(power > 0)
+		{
+		returntenlength *= 10;
+		power--;
+		}
+		returnnumber=returntenlength*number;
+		power = 0;
+		returntenlength = 1;
+		
+	return returnnumber;	
+	}
+	
+	//the last two parameters show the place, wich should be resetted. 0, 6 is score; 7, 13 is highscore
+	//clear, to avoid that several lights on one point
+	//reset sets all digits to 0
+	void clearscorefield(bool resetorclear, int enclose1, int enclose2) //false=reset, true=clear
+	{
+		for(int i=0; i<=9; i++)
+		{
+			for (int j=enclose1; j<=enclose2; j++)
+			{
+			SetLightVisible("score_"+i+"_"+j, false);
+			
+				if (resetorclear == false)
+				{
+				SetLightVisible("score_0_"+j, true);
+				}
+			}
+		}
+	}
+	
+	bool need;
+	void drawcollected(int collected)
+	{	
+		if(need == true)	setnull(collected);
+	
+		if(collected <= 9)
+		{
+		SetLightVisible("score_"+collected+"_14", true);
+		}
+		
+		else if(collected >= 10 && collected <= 99)
+		{
+		SetLightVisible("score_"+(collected/10)+"_15", true);
+		collected=(collected-(collected/10*10));
+		drawcollected(collected);
+		}
+		
+		else if(collected >= 100)
+		{
+		SetLightVisible("score_"+(collected/100)+"_16", true);
+		collected=(collected-(collected/100*100));
+		drawcollected(collected);
+		}
+	}
+	
+	void setnull(int collected)
+	{
+	if((collected/10)==0)
+		{
+		clearscorefield(false, 15, 16);
+		clearscorefield(true, 14, 14);
+		}
+		
+		else if((collected/100)==0)
+		{
+		clearscorefield(false, 16, 16);
+		clearscorefield(true, 14, 15);
+		}
+		
+		else if((collected-(collected/100*100)) <= 9)
+		{
+		clearscorefield(false, 15, 15);
+		clearscorefield(true, 14, 14);
+		clearscorefield(true, 16, 16);
+		}
+		
+		else clearscorefield(true, 14, 16);
+		
+		need = false;
+	}
+	
+	int snakelength = 1;
+	void snakefeedpointcollision()
+	{
+		if ((yy-GetGlobalVarInt(""+convertIntyr(pointscollected))) == 0 && (xx-GetGlobalVarInt(""+convertIntxr(pointscollected))) == 0)
+		{
+		snakelength++;
+		if(snakelength == speed1) steptime -= 0.05;
+		if(snakelength == speed2) steptime -= 0.05;
+		if(snakelength == speed3) steptime -= 0.05;
+		if(snakelength == speed4) steptime -= 0.05;
+		createfeedpoint();
+		pointscollectedgame++;
+		need = true;
+		drawcollected(pointscollectedgame);
+			if(scoremodelight == 1)
+			{
+			switch(wichobstacle)
+				{
+				case 0:
+				drawscore(((50*difficultylight)+(100/(max_y-100))), 0, 1);
+				break;
+				case 1:
+				drawscore(((50*difficultylight)+30), 0, 1);
+				break;
+				case 2:
+				drawscore(((50*difficultylight)+35), 0, 1);
+				break;
+				case 3:
+				drawscore((50*difficultylight)+35, 0, 1);
+				break;
+				case 4:
+				drawscore(((50*difficultylight)+45), 0, 1);
+				break;
+				}
+			}
+		}
+	}
+	
+	
+	//***STEPTIME - SPEED OF SNAKE***
+	int steps = 1;
+	float steptime;
+	void steptimer(string &in asTimer)
+	{
+		AddTimer("repeater", steptime, "steptimer");
+		snakefeedpointcollision();
+		topsnake();
+		removepoint();
+		allowmovement = true;
+	}
